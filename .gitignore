@@ -1,0 +1,26 @@
+# Maven / build
+target/
+bin/
+*.class
+*.jar
+*.war
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.apt_generated/
+.sts4-cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secretos locales
+.env
+!.env.example
