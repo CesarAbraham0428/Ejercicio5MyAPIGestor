@@ -10,4 +10,9 @@ class Ejercicio5MyApiGestorApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void mainArrancaLaAplicacion() {
+		Ejercicio5MyApiGestorApplication.main(new String[] { "--server.port=0", "--spring.main.web-application-type=none" });
+	}
+
 }
