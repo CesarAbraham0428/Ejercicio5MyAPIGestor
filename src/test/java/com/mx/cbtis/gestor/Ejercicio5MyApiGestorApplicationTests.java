@@ -1,5 +1,7 @@
 package com.mx.cbtis.gestor;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -12,7 +14,9 @@ class Ejercicio5MyApiGestorApplicationTests {
 
 	@Test
 	void mainArrancaLaAplicacion() {
-		Ejercicio5MyApiGestorApplication.main(new String[] { "--server.port=0", "--spring.main.web-application-type=none" });
+		String[] args = { "--server.port=0", "--spring.main.web-application-type=none" };
+
+		assertDoesNotThrow(() -> Ejercicio5MyApiGestorApplication.main(args));
 	}
 
 }
