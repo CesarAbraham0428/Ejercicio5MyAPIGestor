@@ -12,79 +12,72 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mx.cbtis.gestor.dto.ProyectosDTO;
 import com.mx.cbtis.gestor.modelo.Proyectos;
 import com.mx.cbtis.gestor.repository.ProtectosRepository;
 
 @RestController
 public class ProyectosController {
-	
-	@Autowired 
-	ProtectosRepository proyectostable;
-	
-	/*@PostMapping("/buscarProyecto")
-	public Proyectos getProyecto(@RequestBody Proyectos proyecto) {
-		
-		Proyectos buscar = new Proyectos();
-		Optional<Proyectos> proyectos = proyectostable.findById(proyecto.getId_proyecto());
-		if(proyectos.isPresent()) {
-			buscar = proyectos.get();
-		}
-		
-		return buscar;
-	}*/
-	
+
+	private final ProtectosRepository proyectostable;
+
+	@Autowired
+	public ProyectosController(ProtectosRepository proyectostable) {
+		this.proyectostable = proyectostable;
+	}
+
 	@GetMapping("/buscarProyecto")
 	public Proyectos getProyecto(@RequestParam int id_proyecto) {
-		
+
 		Proyectos buscar = new Proyectos();
 		Optional<Proyectos> proyecto = proyectostable.findById(id_proyecto);
 		if(proyecto.isPresent()) {
 			buscar = proyecto.get();
 		}
-		
+
 		return buscar;
 	}
-	
+
 	@PostMapping("/addProyecto")
-	public int addProyecto(@RequestBody Proyectos proyecto) {
-		
+	public int addProyecto(@RequestBody ProyectosDTO proyecto) {
+
 		int flag = 0;
-		if(!proyecto.equals(null)) {
-			
-			proyectostable.save(proyecto);
+		if(proyecto != null) {
+
+			proyectostable.save(proyecto.toEntity());
 			flag = 1;
 		}
-		
+
 		return flag;
 	}
-	
+
 	@PostMapping("/updateProyecto")
-	public int updateProyecto(@RequestBody Proyectos proyecto) {
-		
+	public int updateProyecto(@RequestBody ProyectosDTO proyecto) {
+
 		int flag = 0;
-		if(!proyecto.equals(null)) {
-			proyectostable.save(proyecto);
+		if(proyecto != null) {
+			proyectostable.save(proyecto.toEntity());
 			flag = 1;
 		}
-		
+
 		return flag;
 	}
-	
+
 	@DeleteMapping("/deleteProyecto")
-	public int deleteProyecto(@RequestBody Proyectos proyecto) {
-		
+	public int deleteProyecto(@RequestBody ProyectosDTO proyecto) {
+
 		int flag = 0;
-		if(!proyecto.equals(null)) {
-			proyectostable.delete(proyecto);
+		if(proyecto != null) {
+			proyectostable.delete(proyecto.toEntity());
 			flag = 1;
 		}
-		
+
 		return flag;
-	}   
-	
+	}
+
 	@PostMapping("/buscarProyectos")
 	public List<Proyectos> getProyectos(){
-		
+
 		List<Proyectos> listaProyectos = new ArrayList<>();
 		proyectostable.findAll().forEach(listaProyectos :: add);
 		return listaProyectos;

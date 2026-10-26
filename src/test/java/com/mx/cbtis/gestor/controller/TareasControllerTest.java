@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -13,10 +14,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.mx.cbtis.gestor.dto.TareasDTO;
 import com.mx.cbtis.gestor.modelo.Tareas;
 import com.mx.cbtis.gestor.repository.TareasRepository;
 
@@ -29,9 +32,23 @@ class TareasControllerTest {
 	@InjectMocks
 	private TareasController controller;
 
+	private static TareasDTO dto() {
+		return new TareasDTO(10, "Implementar API", "Crear endpoints", "2026-10-20", "Pendiente", "Abierta", 5);
+	}
+
+	private static void assertEntidadDelDto(Tareas entidad) {
+		assertEquals(10, entidad.getId_tarea());
+		assertEquals("Implementar API", entidad.getNombre());
+		assertEquals("Crear endpoints", entidad.getDescripcion());
+		assertEquals("2026-10-20", entidad.getFecha_vencimiento());
+		assertEquals("Pendiente", entidad.getLista());
+		assertEquals("Abierta", entidad.getEstado());
+		assertEquals(5, entidad.getId_proyecto());
+	}
+
 	@Test
 	void buscarTareasPorProyectoUsaElIdDelProyecto() {
-		Tareas filtro = new Tareas(null, null, null, null, null, null, 5);
+		TareasDTO filtro = new TareasDTO(null, null, null, null, null, null, 5);
 		Tareas tarea = new Tareas(10, "Implementar API", "Crear endpoints", "2026-10-20", "Pendiente", "Abierta", 5);
 		when(tareasRepository.findByIdProyecto(5)).thenReturn(Collections.singletonList(tarea));
 
@@ -59,26 +76,47 @@ class TareasControllerTest {
 
 	@Test
 	void agregarTareaLaGuardaYDevuelveUno() {
-		Tareas tarea = new Tareas(10, "Implementar API", "Crear endpoints", "2026-10-20", "Pendiente", "Abierta", 5);
+		assertEquals(1, controller.addTareas(dto()));
 
-		assertEquals(1, controller.addTareas(tarea));
-		verify(tareasRepository).save(tarea);
+		ArgumentCaptor<Tareas> captor = ArgumentCaptor.forClass(Tareas.class);
+		verify(tareasRepository).save(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void agregarTareaNulaNoGuardaYDevuelveCero() {
+		assertEquals(0, controller.addTareas(null));
+		verifyNoInteractions(tareasRepository);
 	}
 
 	@Test
 	void actualizarTareaLaGuardaYDevuelveUno() {
-		Tareas tarea = new Tareas(10, "Implementar API", "Crear endpoints", "2026-10-20", "Pendiente", "Abierta", 5);
+		assertEquals(1, controller.updateTareas(dto()));
 
-		assertEquals(1, controller.updateTareas(tarea));
-		verify(tareasRepository).save(tarea);
+		ArgumentCaptor<Tareas> captor = ArgumentCaptor.forClass(Tareas.class);
+		verify(tareasRepository).save(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void actualizarTareaNulaNoGuardaYDevuelveCero() {
+		assertEquals(0, controller.updateTareas(null));
+		verifyNoInteractions(tareasRepository);
 	}
 
 	@Test
 	void eliminarTareaLaEliminaYDevuelveUno() {
-		Tareas tarea = new Tareas(10, "Implementar API", "Crear endpoints", "2026-10-20", "Pendiente", "Abierta", 5);
+		assertEquals(1, controller.deleteTareas(dto()));
 
-		assertEquals(1, controller.deleteTareas(tarea));
-		verify(tareasRepository).delete(tarea);
+		ArgumentCaptor<Tareas> captor = ArgumentCaptor.forClass(Tareas.class);
+		verify(tareasRepository).delete(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void eliminarTareaNulaNoEliminaYDevuelveCero() {
+		assertEquals(0, controller.deleteTareas(null));
+		verifyNoInteractions(tareasRepository);
 	}
 
 	@Test

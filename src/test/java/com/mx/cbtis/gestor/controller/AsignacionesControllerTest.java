@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -12,10 +13,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.mx.cbtis.gestor.dto.AsignacionesDTO;
 import com.mx.cbtis.gestor.modelo.Asignaciones;
 import com.mx.cbtis.gestor.repository.AsignacionesRepository;
 
@@ -27,6 +30,17 @@ class AsignacionesControllerTest {
 
 	@InjectMocks
 	private AsignacionesController controller;
+
+	private static AsignacionesDTO dto() {
+		return new AsignacionesDTO(1, 7, 12, "2026-10-01");
+	}
+
+	private static void assertEntidadDelDto(Asignaciones entidad) {
+		assertEquals(1, entidad.getId_asignacion());
+		assertEquals(7, entidad.getId_usuario());
+		assertEquals(12, entidad.getId_tarea());
+		assertEquals("2026-10-01", entidad.getFecha_asignacion());
+	}
 
 	@Test
 	void buscarAsignacionCuandoExisteLaDevuelve() {
@@ -50,26 +64,47 @@ class AsignacionesControllerTest {
 
 	@Test
 	void agregarAsignacionLaGuardaYDevuelveUno() {
-		Asignaciones asignacion = new Asignaciones(1, 7, 12, "2026-10-01");
+		assertEquals(1, controller.addAsignacion(dto()));
 
-		assertEquals(1, controller.addAsignacion(asignacion));
-		verify(asignacionesRepository).save(asignacion);
+		ArgumentCaptor<Asignaciones> captor = ArgumentCaptor.forClass(Asignaciones.class);
+		verify(asignacionesRepository).save(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void agregarAsignacionNulaNoGuardaYDevuelveCero() {
+		assertEquals(0, controller.addAsignacion(null));
+		verifyNoInteractions(asignacionesRepository);
 	}
 
 	@Test
 	void actualizarAsignacionLaGuardaYDevuelveUno() {
-		Asignaciones asignacion = new Asignaciones(1, 7, 12, "2026-10-01");
+		assertEquals(1, controller.updateAsignacion(dto()));
 
-		assertEquals(1, controller.updateAsignacion(asignacion));
-		verify(asignacionesRepository).save(asignacion);
+		ArgumentCaptor<Asignaciones> captor = ArgumentCaptor.forClass(Asignaciones.class);
+		verify(asignacionesRepository).save(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void actualizarAsignacionNulaNoGuardaYDevuelveCero() {
+		assertEquals(0, controller.updateAsignacion(null));
+		verifyNoInteractions(asignacionesRepository);
 	}
 
 	@Test
 	void eliminarAsignacionLaEliminaYDevuelveUno() {
-		Asignaciones asignacion = new Asignaciones(1, 7, 12, "2026-10-01");
+		assertEquals(1, controller.deleteAsignacion(dto()));
 
-		assertEquals(1, controller.deleteAsignacion(asignacion));
-		verify(asignacionesRepository).delete(asignacion);
+		ArgumentCaptor<Asignaciones> captor = ArgumentCaptor.forClass(Asignaciones.class);
+		verify(asignacionesRepository).delete(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void eliminarAsignacionNulaNoEliminaYDevuelveCero() {
+		assertEquals(0, controller.deleteAsignacion(null));
+		verifyNoInteractions(asignacionesRepository);
 	}
 
 	@Test

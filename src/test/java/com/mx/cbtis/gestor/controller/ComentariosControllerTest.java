@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -13,10 +14,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.mx.cbtis.gestor.dto.ComentariosDTO;
 import com.mx.cbtis.gestor.modelo.Comentarios;
 import com.mx.cbtis.gestor.repository.ComentariosRepository;
 
@@ -29,9 +32,21 @@ class ComentariosControllerTest {
 	@InjectMocks
 	private ComentariosController controller;
 
+	private static ComentariosDTO dto() {
+		return new ComentariosDTO(1, "7", 12, "Avance listo", "2026-10-01 10:00");
+	}
+
+	private static void assertEntidadDelDto(Comentarios entidad) {
+		assertEquals(1, entidad.getId_comentario());
+		assertEquals("7", entidad.getId_usuario());
+		assertEquals(12, entidad.getId_tarea());
+		assertEquals("Avance listo", entidad.getTexto_comentario());
+		assertEquals("2026-10-01 10:00", entidad.getFecha_hora());
+	}
+
 	@Test
 	void buscarComentariosPorTareaUsaElIdDeLaTarea() {
-		Comentarios filtro = new Comentarios(0, null, 12, null, null);
+		ComentariosDTO filtro = new ComentariosDTO(0, null, 12, null, null);
 		Comentarios comentario = new Comentarios(1, "7", 12, "Avance listo", "2026-10-01 10:00");
 		when(comentariosRepository.findByTarea(12)).thenReturn(Collections.singletonList(comentario));
 
@@ -59,26 +74,47 @@ class ComentariosControllerTest {
 
 	@Test
 	void agregarComentarioLoGuardaYDevuelveUno() {
-		Comentarios comentario = new Comentarios(1, "7", 12, "Avance listo", "2026-10-01 10:00");
+		assertEquals(1, controller.addComentario(dto()));
 
-		assertEquals(1, controller.addComentario(comentario));
-		verify(comentariosRepository).save(comentario);
+		ArgumentCaptor<Comentarios> captor = ArgumentCaptor.forClass(Comentarios.class);
+		verify(comentariosRepository).save(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void agregarComentarioNuloNoGuardaYDevuelveCero() {
+		assertEquals(0, controller.addComentario(null));
+		verifyNoInteractions(comentariosRepository);
 	}
 
 	@Test
 	void actualizarComentarioLoGuardaYDevuelveUno() {
-		Comentarios comentario = new Comentarios(1, "7", 12, "Avance listo", "2026-10-01 10:00");
+		assertEquals(1, controller.updateComentario(dto()));
 
-		assertEquals(1, controller.updateComentario(comentario));
-		verify(comentariosRepository).save(comentario);
+		ArgumentCaptor<Comentarios> captor = ArgumentCaptor.forClass(Comentarios.class);
+		verify(comentariosRepository).save(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void actualizarComentarioNuloNoGuardaYDevuelveCero() {
+		assertEquals(0, controller.updateComentario(null));
+		verifyNoInteractions(comentariosRepository);
 	}
 
 	@Test
 	void eliminarComentarioLoEliminaYDevuelveUno() {
-		Comentarios comentario = new Comentarios(1, "7", 12, "Avance listo", "2026-10-01 10:00");
+		assertEquals(1, controller.deleteComentario(dto()));
 
-		assertEquals(1, controller.deleteComentario(comentario));
-		verify(comentariosRepository).delete(comentario);
+		ArgumentCaptor<Comentarios> captor = ArgumentCaptor.forClass(Comentarios.class);
+		verify(comentariosRepository).delete(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void eliminarComentarioNuloNoEliminaYDevuelveCero() {
+		assertEquals(0, controller.deleteComentario(null));
+		verifyNoInteractions(comentariosRepository);
 	}
 
 	@Test

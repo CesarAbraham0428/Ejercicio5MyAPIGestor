@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -12,10 +13,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.mx.cbtis.gestor.dto.ProyectosDTO;
 import com.mx.cbtis.gestor.modelo.Proyectos;
 import com.mx.cbtis.gestor.repository.ProtectosRepository;
 
@@ -27,6 +30,20 @@ class ProyectosControllerTest {
 
 	@InjectMocks
 	private ProyectosController controller;
+
+	private static ProyectosDTO dto() {
+		return new ProyectosDTO(3, "Proyecto A", "Descripción", "2026-10-01", "2026-12-01", "Activo", "azul");
+	}
+
+	private static void assertEntidadDelDto(Proyectos entidad) {
+		assertEquals(3, entidad.getId_proyecto());
+		assertEquals("Proyecto A", entidad.getNombre());
+		assertEquals("Descripción", entidad.getDescripcion());
+		assertEquals("2026-10-01", entidad.getFecha_inicio());
+		assertEquals("2026-12-01", entidad.getFecha_finalizacion());
+		assertEquals("Activo", entidad.getEstado_proyecto());
+		assertEquals("azul", entidad.getFondo());
+	}
 
 	@Test
 	void buscarProyectoCuandoExisteLoDevuelve() {
@@ -48,26 +65,47 @@ class ProyectosControllerTest {
 
 	@Test
 	void agregarProyectoLoGuardaYDevuelveUno() {
-		Proyectos proyecto = new Proyectos(3, "Proyecto A", "Descripción", "2026-10-01", "2026-12-01", "Activo", "azul");
+		assertEquals(1, controller.addProyecto(dto()));
 
-		assertEquals(1, controller.addProyecto(proyecto));
-		verify(proyectosRepository).save(proyecto);
+		ArgumentCaptor<Proyectos> captor = ArgumentCaptor.forClass(Proyectos.class);
+		verify(proyectosRepository).save(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void agregarProyectoNuloNoGuardaYDevuelveCero() {
+		assertEquals(0, controller.addProyecto(null));
+		verifyNoInteractions(proyectosRepository);
 	}
 
 	@Test
 	void actualizarProyectoLoGuardaYDevuelveUno() {
-		Proyectos proyecto = new Proyectos(3, "Proyecto A", "Descripción", "2026-10-01", "2026-12-01", "Activo", "azul");
+		assertEquals(1, controller.updateProyecto(dto()));
 
-		assertEquals(1, controller.updateProyecto(proyecto));
-		verify(proyectosRepository).save(proyecto);
+		ArgumentCaptor<Proyectos> captor = ArgumentCaptor.forClass(Proyectos.class);
+		verify(proyectosRepository).save(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void actualizarProyectoNuloNoGuardaYDevuelveCero() {
+		assertEquals(0, controller.updateProyecto(null));
+		verifyNoInteractions(proyectosRepository);
 	}
 
 	@Test
 	void eliminarProyectoLoEliminaYDevuelveUno() {
-		Proyectos proyecto = new Proyectos(3, "Proyecto A", "Descripción", "2026-10-01", "2026-12-01", "Activo", "azul");
+		assertEquals(1, controller.deleteProyecto(dto()));
 
-		assertEquals(1, controller.deleteProyecto(proyecto));
-		verify(proyectosRepository).delete(proyecto);
+		ArgumentCaptor<Proyectos> captor = ArgumentCaptor.forClass(Proyectos.class);
+		verify(proyectosRepository).delete(captor.capture());
+		assertEntidadDelDto(captor.getValue());
+	}
+
+	@Test
+	void eliminarProyectoNuloNoEliminaYDevuelveCero() {
+		assertEquals(0, controller.deleteProyecto(null));
+		verifyNoInteractions(proyectosRepository);
 	}
 
 	@Test

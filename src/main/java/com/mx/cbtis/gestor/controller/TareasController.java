@@ -12,73 +12,77 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mx.cbtis.gestor.dto.TareasDTO;
 import com.mx.cbtis.gestor.modelo.Tareas;
-import com.mx.cbtis.gestor.modelo.Usuario;
 import com.mx.cbtis.gestor.repository.TareasRepository;
 
 @RestController
 public class TareasController {
-	
+
+	private final TareasRepository tareastable;
+
 	@Autowired
-	TareasRepository tareastable;
-	
+	public TareasController(TareasRepository tareastable) {
+		this.tareastable = tareastable;
+	}
+
 	@PostMapping("/getTarea")
-	public List<Tareas> getTarea(@RequestBody Tareas id_proyecto) {
+	public List<Tareas> getTarea(@RequestBody TareasDTO id_proyecto) {
 		List<Tareas> listaTareas = tareastable.findByIdProyecto(id_proyecto.getId_proyecto());
 		return listaTareas;
 	}
-	
+
 	@GetMapping("/buscarTarea")
 	public Tareas getTarea(@RequestParam int id_tarea) {
-		
+
 		Tareas buscar = new Tareas();
 		Optional<Tareas> tarea = tareastable.findById(id_tarea);
 		if(tarea.isPresent()) {
 			buscar = tarea.get();
 		}
-		
+
 		return buscar;
 	}
-	
+
 	@PostMapping("/addTareas")
-	public int addTareas(@RequestBody Tareas tareas) {
-		
+	public int addTareas(@RequestBody TareasDTO tareas) {
+
 		int flag = 0;
-		if(!tareas.equals(null)) {
-			tareastable.save(tareas);
+		if(tareas != null) {
+			tareastable.save(tareas.toEntity());
 			flag = 1;
 		}
-		
+
 		return flag;
 	}
-	
+
 	@PostMapping("/updateTareas")
-	public int updateTareas(@RequestBody Tareas tareas) {
-		
+	public int updateTareas(@RequestBody TareasDTO tareas) {
+
 		int flag = 0;
-		if(!tareas.equals(null)) {
-			tareastable.save(tareas);
+		if(tareas != null) {
+			tareastable.save(tareas.toEntity());
 			flag = 1;
 		}
-		
+
 		return flag;
 	}
-	
+
 	@DeleteMapping("/deleteTareas")
-	public int deleteTareas(@RequestBody Tareas tareas) {
-		
+	public int deleteTareas(@RequestBody TareasDTO tareas) {
+
 		int flag = 0;
-		if(!tareas.equals(null)) {
-			tareastable.delete(tareas);
+		if(tareas != null) {
+			tareastable.delete(tareas.toEntity());
 			flag = 1;
 		}
-		
+
 		return flag;
 	}
-	
+
 	@PostMapping("/buscarTareas")
 	public List<Tareas> getTareas(){
-		
+
 		List<Tareas> listaTareas = new ArrayList<>();
 		tareastable.findAll().forEach(listaTareas :: add);
 		return listaTareas;
